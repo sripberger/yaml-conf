@@ -6,28 +6,28 @@ const yaml = require('js-yaml');
 const XError = require('xerror');
 
 describe('utils', function() {
-	describe('::getConfigPath', function() {
+	describe('::getPath', function() {
 		it('returns the full path to the configuration file', function() {
 			let file = 'path/to/config';
 			let expected = path.resolve(process.cwd(), file);
 
-			expect(utils.getConfigPath('foo', file)).to.deep.equal(expected);
+			expect(utils.getPath('foo', file)).to.deep.equal(expected);
 		});
 
 		it('supports absolute paths', function() {
 			let file = '/path/to/config';
 
-			expect(utils.getConfigPath('foo', file)).to.deep.equal(file);
+			expect(utils.getPath('foo', file)).to.deep.equal(file);
 		});
 
 		it('defaults to app config in home folder', function() {
 			let expected = path.resolve(os.homedir(), 'foo.conf.yml');
 
-			expect(utils.getConfigPath('foo')).to.deep.equal(expected);
+			expect(utils.getPath('foo')).to.deep.equal(expected);
 		});
 	});
 
-	describe('::readConfig', function() {
+	describe('::read', function() {
 		const path = '/path/to/config';
 		const text = 'foo: bar';
 		const obj = { foo: 'bar' };
@@ -38,7 +38,7 @@ describe('utils', function() {
 		});
 
 		it('synchronously reads parsed yaml from provided path', function() {
-			let result = utils.readConfig(path);
+			let result = utils.read(path);
 
 			expect(fse.readFileSync).to.be.calledOnce;
 			expect(fse.readFileSync).to.be.calledOn(fse);
@@ -53,7 +53,7 @@ describe('utils', function() {
 			let readErr = new Error('read error');
 			fse.readFileSync.throws(readErr);
 
-			expect(() => utils.readConfig(path))
+			expect(() => utils.read(path))
 				.to.throw(XError).that.satisfies((err) => {
 					expect(err.code).to.equal(XError.INVALID_ARGUMENT);
 					expect(err.message).to.equal('Could not read config file.');
@@ -67,7 +67,7 @@ describe('utils', function() {
 			let readErr = new Error('read error');
 			fse.readFileSync.throws(readErr);
 
-			let result = utils.readConfig(path, true);
+			let result = utils.read(path, true);
 
 			expect(yaml.safeLoad).to.not.be.called;
 			expect(result).to.deep.equal({});
@@ -77,7 +77,7 @@ describe('utils', function() {
 			let parseErr = new Error('parsing error');
 			yaml.safeLoad.throws(parseErr);
 
-			expect(() => utils.readConfig(path))
+			expect(() => utils.read(path))
 				.to.throw(XError).that.satisfies((err) => {
 					expect(err.code).to.equal(XError.INVALID_ARGUMENT);
 					expect(err.message).to.equal('Invalid YAML in config file.');

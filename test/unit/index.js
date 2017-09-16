@@ -19,8 +19,8 @@ describe('index', function() {
 			conf = { conf: 'baz' };
 			defaultConf = { default: 'qux' };
 
-			sandbox.stub(utils, 'getConfigPath').returns(confPath);
-			sandbox.stub(utils, 'readConfig')
+			sandbox.stub(utils, 'getPath').returns(confPath);
+			sandbox.stub(utils, 'read')
 				.withArgs(confPath, sinon.match.any).returns(conf)
 				.withArgs(defaultPath, sinon.match.any).returns(defaultConf);
 			sandbox.stub(_, 'defaultsDeep').returnsArg(0);
@@ -29,14 +29,14 @@ describe('index', function() {
 		it('creates config from provided options and project defaults', function() {
 			let result = yamlConf.build(options);
 
-			expect(utils.getConfigPath).to.be.calledOnce;
-			expect(utils.getConfigPath).to.be.calledWith(
+			expect(utils.getPath).to.be.calledOnce;
+			expect(utils.getPath).to.be.calledWith(
 				options.app,
 				options.path
 			);
-			expect(utils.readConfig).to.be.calledTwice;
-			expect(utils.readConfig).to.be.calledWith(confPath, false);
-			expect(utils.readConfig).to.be.calledWith(defaultPath, true);
+			expect(utils.read).to.be.calledTwice;
+			expect(utils.read).to.be.calledWith(confPath, false);
+			expect(utils.read).to.be.calledWith(defaultPath, true);
 			expect(_.defaultsDeep).to.be.calledOnce;
 			expect(_.defaultsDeep).to.be.calledWithExactly(
 				{},
@@ -52,9 +52,9 @@ describe('index', function() {
 
 			yamlConf.build(options);
 
-			expect(utils.readConfig).to.be.calledTwice;
-			expect(utils.readConfig).to.be.calledWith(confPath, true);
-			expect(utils.readConfig).to.be.calledWith(defaultPath, true);
+			expect(utils.read).to.be.calledTwice;
+			expect(utils.read).to.be.calledWith(confPath, true);
+			expect(utils.read).to.be.calledWith(defaultPath, true);
 		});
 	});
 });
