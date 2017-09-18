@@ -5,20 +5,23 @@ const utils = require('../../lib/utils');
 
 describe('index', function() {
 	describe('::build', function() {
-		let options, confPath, defaultPath, conf, defaultConf;
+		let options, withDefaults, confPath, defaultPath, conf, defaultConf;
 
 		beforeEach(function() {
 			options = {
-				projectDir: '/path/to/project',
-				appName: 'foo',
 				path: 'relative/conf/path',
 				overrides: { override: 'bar' }
 			};
+			withDefaults = _.assign({}, options, {
+				projectDir: '/path/to/project',
+				appName: 'foo'
+			});
 			confPath = '/absolute/conf/path';
 			defaultPath = '/path/to/project/default.conf.yml';
 			conf = { conf: 'baz' };
 			defaultConf = { default: 'qux' };
 
+			sandbox.stub(utils, 'addDefaults').returns(withDefaults);
 			sandbox.stub(utils, 'getPath').returns(confPath);
 			sandbox.stub(utils, 'read')
 				.withArgs(confPath, sinon.match.any).returns(conf)
@@ -29,8 +32,11 @@ describe('index', function() {
 		it('creates config from provided options and project defaults', function() {
 			let result = yamlConf.build(options);
 
+			expect(utils.addDefaults).to.be.calledOnce;
+			expect(utils.addDefaults).to.be.calledOn(utils);
+			expect(utils.addDefaults).to.be.calledWith(options);
 			expect(utils.getPath).to.be.calledOnce;
-			expect(utils.getPath).to.be.calledWith(options);
+			expect(utils.getPath).to.be.calledWith(withDefaults);
 			expect(utils.read).to.be.calledTwice;
 			expect(utils.read).to.be.calledWith(confPath, false);
 			expect(utils.read).to.be.calledWith(defaultPath, true);
