@@ -9,9 +9,9 @@ describe('index', function() {
 
 		beforeEach(function() {
 			options = {
-				app: 'foo',
-				path: 'relative/conf/path',
 				projectDir: '/path/to/project',
+				appName: 'foo',
+				path: 'relative/conf/path',
 				overrides: { override: 'bar' }
 			};
 			confPath = '/absolute/conf/path';
@@ -30,10 +30,7 @@ describe('index', function() {
 			let result = yamlConf.build(options);
 
 			expect(utils.getPath).to.be.calledOnce;
-			expect(utils.getPath).to.be.calledWith(
-				options.app,
-				options.path
-			);
+			expect(utils.getPath).to.be.calledWith(options);
 			expect(utils.read).to.be.calledTwice;
 			expect(utils.read).to.be.calledWith(confPath, false);
 			expect(utils.read).to.be.calledWith(defaultPath, true);

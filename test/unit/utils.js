@@ -161,24 +161,45 @@ describe('utils', function() {
 		});
 	});
 
+	describe('::addDefaults', function() {
+		it('adds project dir then app name', function() {
+			let options = { foo: 'bar' };
+			let withProjectDir = { foo: 'bar', projectDir: 'baz' };
+			let withAppName = { foo: 'bar', projectDir: 'baz', appName: 'qux' };
+			sandbox.stub(utils, 'addProjectDir').returns(withProjectDir);
+			sandbox.stub(utils, 'addAppName').returns(withAppName);
+
+			let result = utils.addDefaults(options);
+
+			expect(utils.addProjectDir).to.be.calledOnce;
+			expect(utils.addProjectDir).to.be.calledOn(utils);
+			expect(utils.addProjectDir).to.be.calledWith(options);
+			expect(utils.addAppName).to.be.calledOnce;
+			expect(utils.addAppName).to.be.calledOn(utils);
+			expect(utils.addAppName).to.be.calledWith(withProjectDir);
+			expect(result).to.deep.equal(withAppName);
+		});
+	});
+
 	describe('::getPath', function() {
 		it('returns the full path to the configuration file', function() {
-			let file = 'path/to/config';
-			let expected = path.resolve(process.cwd(), file);
+			let options = { appName: 'foo', path: 'path/to/config' };
+			let expected = path.resolve(process.cwd(), options.path);
 
-			expect(utils.getPath('foo', file)).to.deep.equal(expected);
+			expect(utils.getPath(options)).to.deep.equal(expected);
 		});
 
 		it('supports absolute paths', function() {
-			let file = '/path/to/config';
+			let options = { appName: 'foo', path: '/path/to/config' };
 
-			expect(utils.getPath('foo', file)).to.deep.equal(file);
+			expect(utils.getPath(options)).to.deep.equal(options.path);
 		});
 
 		it('defaults to app config in home folder', function() {
+			let options = { appName: 'foo' };
 			let expected = path.resolve(os.homedir(), 'foo.conf.yml');
 
-			expect(utils.getPath('foo')).to.deep.equal(expected);
+			expect(utils.getPath(options)).to.deep.equal(expected);
 		});
 	});
 
