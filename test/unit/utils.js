@@ -109,6 +109,58 @@ describe('utils', function() {
 		});
 	});
 
+	describe('::addProjectDir', function() {
+		const projectDir = '/path/to/project';
+
+		beforeEach(function() {
+			sandbox.stub(utils, 'getProjectDir').returns(projectDir);
+		});
+
+		it('returns copy of options with project dir from ::getProjectDir', function() {
+			let result = utils.addProjectDir({ foo: 'bar' });
+
+			expect(utils.getProjectDir).to.be.calledOnce;
+			expect(utils.getProjectDir).to.be.calledOn(utils);
+			expect(result).to.deep.equal({ foo: 'bar', projectDir });
+		});
+
+		it('returns unchanged options if project dir is already provided', function() {
+			let options = { foo: 'bar', projectDir };
+
+			let result = utils.addProjectDir(options);
+
+			expect(utils.getProjectDir).to.not.be.called;
+			expect(result).to.equal(options);
+		});
+	});
+
+	describe('::addAppName', function() {
+		const projectDir = '/path/to/project';
+		const appName = 'app-name';
+
+		beforeEach(function() {
+			sandbox.stub(utils, 'getAppName').returns(appName);
+		});
+
+		it('returns copy of options with app name from ::getAppName', function() {
+			let result = utils.addAppName({ foo: 'bar', projectDir });
+
+			expect(utils.getAppName).to.be.calledOnce;
+			expect(utils.getAppName).to.be.calledOn(utils);
+			expect(utils.getAppName).to.be.calledWith(projectDir);
+			expect(result).to.deep.equal({ foo: 'bar', projectDir, appName });
+		});
+
+		it('returns unchanged options if app name is already provided', function() {
+			let options = { foo: 'bar', projectDir, appName };
+
+			let result = utils.addAppName(options);
+
+			expect(utils.getAppName).to.not.be.called;
+			expect(result).to.equal(options);
+		});
+	});
+
 	describe('::getPath', function() {
 		it('returns the full path to the configuration file', function() {
 			let file = 'path/to/config';
