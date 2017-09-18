@@ -6,6 +6,109 @@ const yaml = require('js-yaml');
 const XError = require('xerror');
 
 describe('utils', function() {
+	describe('::getProjectDir', function() {
+		let mainFilename;
+
+		beforeEach(function() {
+			mainFilename = require.main.filename;
+			require.main.filename = '/path/to/main';
+			sandbox.stub(fse, 'existsSync').returns(false);
+		});
+
+		afterEach(function() {
+			require.main.filename = mainFilename;
+		});
+
+		it('checks each directory until root for package.json', function() {
+			fse.existsSync.withArgs('/package.json').returns(true);
+
+			let result = utils.getProjectDir();
+
+			expect(fse.existsSync).to.be.calledThrice;
+			expect(fse.existsSync).to.always.be.calledOn(fse);
+			expect(fse.existsSync).to.be.calledWith('/path/to/package.json');
+			expect(fse.existsSync).to.be.calledWith('/path/package.json');
+			expect(fse.existsSync).to.be.calledWith('/package.json');
+			expect(result).to.equal('/');
+		});
+
+		it('stops early if package.json is found', function() {
+			fse.existsSync.withArgs('/path/package.json').returns(true);
+
+			let result = utils.getProjectDir();
+
+			expect(fse.existsSync).to.be.calledTwice;
+			expect(fse.existsSync).to.always.be.calledOn(fse);
+			expect(fse.existsSync).to.be.calledWith('/path/to/package.json');
+			expect(fse.existsSync).to.be.calledWith('/path/package.json');
+			expect(result).to.equal('/path');
+		});
+
+		it('throws invalid argument if package.json is not found', function() {
+			expect(() => utils.getProjectDir())
+				.to.throw(XError).that.satisfies((err) => {
+					expect(err.code).to.equal(XError.INVALID_ARGUMENT);
+					expect(err.message).to.equal(
+						'Project directory could not be found automatically.'
+					);
+					return true;
+				});
+		});
+	});
+
+	describe('::getAppName', function() {
+		const projectDir = '/path/to/project';
+		const name = 'app-name';
+
+		beforeEach(function() {
+			sandbox.stub(fse, 'readJsonSync').returns({ name });
+		});
+
+		it('reads name from package.json', function() {
+			let result = utils.getAppName(projectDir);
+
+			expect(fse.readJsonSync).to.be.calledOnce;
+			expect(fse.readJsonSync).to.be.calledOn(fse);
+			expect(fse.readJsonSync).to.be.calledWithExactly(
+				`${projectDir}/package.json`
+			);
+			expect(result).to.equal(name);
+		});
+
+		it('throws invalid argument if package.json has no name', function() {
+			fse.readJsonSync.returns({});
+
+			expect(() => utils.getAppName(projectDir))
+				.to.throw(XError).that.satisfies((err) => {
+					expect(err.code).to.equal(XError.INVALID_ARGUMENT);
+					expect(err.message).to.equal(
+						'App name could not be found automatically, ' +
+						'was not set in package.json'
+					);
+					return true;
+				});
+		});
+
+		it('throws invalid arugment if package.json could not be read', function() {
+			let readErr = new Error('read error');
+			fse.readJsonSync.throws(readErr);
+
+			expect(() => utils.getAppName(projectDir))
+				.to.throw(XError).that.satisfies((err) => {
+					expect(err.code).to.equal(XError.INVALID_ARGUMENT);
+					expect(err.message).to.equal(
+						'App name could not be found automatically, ' +
+						'package.json could not be read'
+					);
+					expect(err.data).to.deep.equal({
+						path: `${projectDir}/package.json`
+					});
+					expect(err.cause).to.equal(readErr);
+					return true;
+				});
+		});
+	});
+
 	describe('::getPath', function() {
 		it('returns the full path to the configuration file', function() {
 			let file = 'path/to/config';
