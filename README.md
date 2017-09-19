@@ -94,15 +94,15 @@ program
 	.parse(process.argv);
 
 let conf = yamlConf.build({
-	path: program.path,
+	path: program.config,
 	overrides: _.pick(program, [ 'foo', 'bar' ]);
 });
 ```
 
 
 ## Similar Projects
-As noted above, `yaml-conf` is kept intentionally feature-light. For more
-features you may be intersted in the following modules:
+As noted above, `yaml-conf` is kept intentionally feature-light. If you need
+more features, you may be intersted in the following modules:
 
 - [configurez](https://www.npmjs.com/package/configurez)
 - [yaml-config](https://www.npmjs.com/package/yaml-config)
