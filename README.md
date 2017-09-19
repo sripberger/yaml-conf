@@ -23,7 +23,7 @@ foo: default foo
 bar: default bar
 ```
 
-In `~/${package.json}.conf.yml`
+In `~/application-name.conf.yml`
 ```yaml
 foo: conf foo
 baz: conf baz
