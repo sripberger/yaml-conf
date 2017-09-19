@@ -1,6 +1,6 @@
 {
   "name": "yaml-conf",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Simple yaml-based configuration utility",
   "main": "lib/index.js",
   "repository": {
