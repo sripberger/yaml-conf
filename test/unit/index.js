@@ -53,11 +53,45 @@ describe('index', function() {
 		it('allows FNF if path option is not provided', function() {
 			delete options.path;
 
-			yamlConf.build(options);
+			let result = yamlConf.build(options);
 
+			expect(utils.addDefaults).to.be.calledOnce;
+			expect(utils.addDefaults).to.be.calledOn(utils);
+			expect(utils.addDefaults).to.be.calledWith(options);
+			expect(utils.getPath).to.be.calledOnce;
+			expect(utils.getPath).to.be.calledWith(withDefaults);
 			expect(utils.read).to.be.calledTwice;
 			expect(utils.read).to.be.calledWith(confPath, true);
 			expect(utils.read).to.be.calledWith(defaultPath, true);
+			expect(_.defaultsDeep).to.be.calledOnce;
+			expect(_.defaultsDeep).to.be.calledWithExactly(
+				{},
+				options.overrides,
+				conf,
+				defaultConf
+			);
+			expect(result).to.equal(_.defaultsDeep.firstCall.returnValue);
+		});
+
+		it('defaults to empty options object', function() {
+			let result = yamlConf.build();
+
+			expect(utils.addDefaults).to.be.calledOnce;
+			expect(utils.addDefaults).to.be.calledOn(utils);
+			expect(utils.addDefaults).to.be.calledWith({});
+			expect(utils.getPath).to.be.calledOnce;
+			expect(utils.getPath).to.be.calledWith(withDefaults);
+			expect(utils.read).to.be.calledTwice;
+			expect(utils.read).to.be.calledWith(confPath, true);
+			expect(utils.read).to.be.calledWith(defaultPath, true);
+			expect(_.defaultsDeep).to.be.calledOnce;
+			expect(_.defaultsDeep).to.be.calledWithExactly(
+				{},
+				{},
+				conf,
+				defaultConf
+			);
+			expect(result).to.equal(_.defaultsDeep.firstCall.returnValue);
 		});
 	});
 });
